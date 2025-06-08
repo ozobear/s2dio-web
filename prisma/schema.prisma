@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id       String @id @default(cuid())
+  email    String @unique
+  password String
+  name     String
+  role     Role   @default(ADMIN)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Section {
+  id          String @id @default(cuid())
+  name        String @unique
+  title       String
+  subtitle    String?
+  content     String?
+  isActive    Boolean @default(true)
+  order       Int     @unique
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model TeamMember {
+  id          String @id @default(cuid())
+  name        String
+  role        String
+  bio         String?
+  image       String?
+  linkedIn    String?
+  github      String?
+  email       String?
+  order       Int
+  isActive    Boolean @default(true)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Project {
+  id          String @id @default(cuid())
+  title       String
+  description String
+  longDescription String?
+  image       String?
+  technologies String // JSON array as string
+  githubUrl   String?
+  liveUrl     String?
+  order       Int
+  isActive    Boolean @default(true)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Service {
+  id          String @id @default(cuid())
+  title       String
+  description String
+  icon        String
+  order       Int
+  isActive    Boolean @default(true)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum Role {
+  ADMIN
+  EDITOR
+}
