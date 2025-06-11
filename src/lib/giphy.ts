@@ -27,7 +27,7 @@ export async function getRandomVibingGif(): Promise<{
   try {
     // Buscar GIFs con el término "vibing"
     const response = await fetch(
-      `${GIPHY_BASE_URL}/search?api_key=${GIPHY_API_KEY}&q=vibing&limit=50&rating=g&lang=en`
+      `${GIPHY_BASE_URL}/search?api_key=${GIPHY_API_KEY}&q=meme&limit=50&rating=g&lang=en`
     )
     
     if (!response.ok) {

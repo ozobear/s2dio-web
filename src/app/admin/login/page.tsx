@@ -1,158 +1,143 @@
 'use client'
 
 import { useState } from 'react'
-import { signIn } from 'next-auth/react'
+import { signIn, getSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 
-export default function LoginPage() {
-  const [email, setEmail] = useState('admin@s2dio.com')
-  const [password, setPassword] = useState('admin123')
-  const [isLoading, setIsLoading] = useState(false)
+export default function AdminLogin() {
+  const [credentials, setCredentials] = useState({
+    email: '',
+    password: ''
+  })
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
+    setLoading(true)
     setError('')
 
     try {
-      console.log('🔐 Intentando login con:', email)
-      
       const result = await signIn('credentials', {
-        email,
-        password,
-        redirect: false
+        email: credentials.email,
+        password: credentials.password,
+        redirect: false,
       })
 
-      console.log('📊 Resultado del login:', result)
-
       if (result?.error) {
-        setError('❌ Credenciales inválidas')
-        console.error('Error de login:', result.error)
-      } else if (result?.ok) {
-        console.log('✅ Login exitoso, redirigiendo...')
-        // Forzar redirect
-        window.location.href = '/admin'
+        setError('Credenciales incorrectas')
+      } else {
+        // Verificar la sesión y redirigir
+        const session = await getSession()
+        if (session) {
+          router.push('/admin')
+        }
       }
     } catch (error) {
-      console.error('💥 Error en login:', error)
       setError('Error al iniciar sesión')
     } finally {
-      setIsLoading(false)
+      setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 p-4">
-      <div className="max-w-md w-full">
-        {/* Card principal */}
-        <div className="bg-white rounded-xl shadow-xl p-8 border border-gray-200">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <div className="mb-4">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full mb-4">
-                <span className="text-2xl font-bold text-white">S2</span>
-              </div>
-            </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              S2dio Admin
-            </h1>
-            <p className="text-gray-600">
-              Panel de Administración
-            </p>
-          </div>
+    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-gray-900">S2dio</h1>
+          <h2 className="mt-6 text-2xl font-medium text-gray-600">
+            Panel de Administración
+          </h2>
+          <p className="mt-2 text-sm text-gray-500">
+            Inicia sesión para acceder al panel
+          </p>
+        </div>
+      </div>
 
-          {/* Error Alert */}
-          {error && (
-            <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-400 rounded-md">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <span className="text-red-400">⚠️</span>
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm text-red-800">{error}</p>
-                </div>
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+                {error}
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Login Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                📧 Email
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                Email
               </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                placeholder="admin@s2dio.com"
-                required
-              />
+              <div className="mt-1">
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={credentials.email}
+                  onChange={(e) => setCredentials({...credentials, email: e.target.value})}
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="admin@s2dio.com"
+                />
+              </div>
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                🔒 Contraseña
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                Contraseña
               </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                placeholder="••••••••"
-                required
-              />
+              <div className="mt-1">
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="current-password"
+                  required
+                  value={credentials.password}
+                  onChange={(e) => setCredentials({...credentials, password: e.target.value})}
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="••••••••"
+                />
+              </div>
             </div>
 
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-4 rounded-lg font-semibold hover:from-blue-600 hover:to-purple-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98]"
-            >
-              {isLoading ? (
-                <div className="flex items-center justify-center">
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                  Iniciando sesión...
-                </div>
-              ) : (
-                '🚀 Iniciar Sesión'
-              )}
-            </button>
+            <div>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Iniciando sesión...
+                  </>
+                ) : (
+                  'Iniciar Sesión'
+                )}
+              </button>
+            </div>
           </form>
 
-          {/* Credenciales de prueba */}
-          <div className="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <div className="text-center">
-              <p className="text-sm font-semibold text-blue-800 mb-2">
-                🔑 Credenciales de Prueba
-              </p>
-              <div className="text-sm text-blue-700 space-y-1">
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">Credenciales por defecto</span>
+              </div>
+            </div>
+
+            <div className="mt-4 bg-gray-50 rounded-md p-4">
+              <div className="text-sm text-gray-600">
                 <p><strong>Email:</strong> admin@s2dio.com</p>
-                <p><strong>Password:</strong> admin123</p>
+                <p><strong>Contraseña:</strong> admin123</p>
               </div>
             </div>
           </div>
-
-          {/* Footer */}
-          <div className="mt-6 text-center">
-            <p className="text-xs text-gray-500">
-              S2dio Admin Panel v1.0 • Modo Brutal
-            </p>
-          </div>
         </div>
-
-        {/* Debug info (solo en desarrollo) */}
-        {process.env.NODE_ENV === 'development' && (
-          <div className="mt-4 p-3 bg-gray-800 text-green-400 rounded-lg text-xs font-mono">
-            <p>🐛 Debug Info:</p>
-            <p>• URL: {typeof window !== 'undefined' ? window.location.href : 'SSR'}</p>
-            <p>• NextAuth: {typeof signIn !== 'undefined' ? '✅ Loaded' : '❌ Not loaded'}</p>
-            <p>• Router: {typeof router !== 'undefined' ? '✅ Ready' : '❌ Not ready'}</p>
-          </div>
-        )}
       </div>
     </div>
   )

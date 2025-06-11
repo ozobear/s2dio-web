@@ -24,6 +24,7 @@ model Section {
   title       String
   subtitle    String?
   content     String?
+  videoUrl    String?
   isActive    Boolean @default(true)
   order       Int     @unique
   

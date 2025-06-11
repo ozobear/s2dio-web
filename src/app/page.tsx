@@ -31,15 +31,15 @@ async function getPageData() {
       orderBy: { order: 'asc' }
     })
     
-    const todayGif = await prisma.gifOfTheDay.findFirst({
-      where: {
-        isActive: true,
-        date: {
-          gte: new Date(new Date().toDateString())
-        }
-      },
-      orderBy: { date: 'desc' }
-    })
+    // const todayGif = await prisma.gifOfTheDay.findFirst({
+    //   where: {
+    //     isActive: true,
+    //     date: {
+    //       gte: new Date(new Date().toDateString())
+    //     }
+    //   },
+    //   orderBy: { date: 'desc' }
+    // })
     
     // Convertir array de secciones a objeto por nombre
     const sectionsMap = sections.reduce((acc, section) => {
@@ -52,15 +52,23 @@ async function getPageData() {
       projects: projects.length,
       team: team.length,
       services: services.length,
-      todayGif: !!todayGif
+      // todayGif: !!todayGif
     })
+    
+    // Log específico para el video del Hero
+    const heroSection = sectionsMap.hero
+    if (heroSection?.videoUrl) {
+      console.log('🎬 Video de Hero detectado:', heroSection.videoUrl)
+    } else {
+      console.log('⚪ No hay video configurado para Hero')
+    }
     
     return {
       sections: sectionsMap,
       projects,
       team,
       services,
-      todayGif
+      // todayGif
     }
   } catch (error) {
     console.error('❌ Error obteniendo datos de la base de datos:', error)
@@ -78,7 +86,8 @@ function getMockData() {
       hero: {
         title: 'CONSTRUIMOS EL FUTURO DIGITAL',
         subtitle: 'SOMOS S2DIO, UN ESTUDIO QUE ROMPE LAS REGLAS DEL DISEÑO WEB',
-        content: 'TRANSFORMAMOS IDEAS EN EXPERIENCIAS DIGITALES BRUTALES QUE IMPACTAN Y DESTRUYEN LO CONVENCIONAL'
+        content: 'TRANSFORMAMOS IDEAS EN EXPERIENCIAS DIGITALES BRUTALES QUE IMPACTAN Y DESTRUYEN LO CONVENCIONAL',
+        videoUrl: null // ← Agregado para mock data
       },
       about: {
         title: 'NOSOTROS',
@@ -114,7 +123,8 @@ export default async function HomePage() {
   
   console.log('🎯 Datos del Hero:', {
     title: data.sections.hero?.title,
-    subtitle: data.sections.hero?.subtitle
+    subtitle: data.sections.hero?.subtitle,
+    videoUrl: data.sections.hero?.videoUrl // ← Agregado para debugging
   })
   
   return (
@@ -125,6 +135,7 @@ export default async function HomePage() {
         title={data.sections.hero?.title || 'CONSTRUIMOS EL FUTURO DIGITAL'}
         subtitle={data.sections.hero?.subtitle || 'SOMOS S2DIO, UN ESTUDIO QUE ROMPE LAS REGLAS DEL DISEÑO WEB'}
         content={data.sections.hero?.content || 'TRANSFORMAMOS IDEAS EN EXPERIENCIAS DIGITALES BRUTALES'}
+        videoUrl={data.sections.hero?.videoUrl} // ← AGREGADO: Video desde la base de datos
       />
       
       <About
